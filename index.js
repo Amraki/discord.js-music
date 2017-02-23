@@ -31,7 +31,7 @@ module.exports = function (client, options) {
 		// Check if the message is a command.
 		if (message.startsWith(PREFIX)) {
 			// Get the command and suffix.
-			const command = message.split(/[ \n]/)[1].toLowerCase().trim();
+			const command = message.split(/[ \n]/)[0].substring(PREFIX.length).toLowerCase().trim();
 			const suffix = message.substring(PREFIX.length + command.length).trim();
 
 			// Process the commands.
