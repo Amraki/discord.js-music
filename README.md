@@ -4,7 +4,7 @@ This version is not yet stable, although has been mildly tested, it has not been
 It's an update of the original by [ruiqimao](https://github.com/ruiqimao/discord.js-music) for [Discord.js](https://discord.js.org/)'s version v11.x, and adds a few extra sprinkles. It still requires tweaks and testing but yeah it's something.
 
 The commands available are:
-* `play (<url>|<search string>)`: Play a video/music. It can take a URL from various services (YouTube, Vimeo, YouKu, etc). Search has been removed temporally until a workaround can be found.
+* `play (<url>|<search string>)`: Play a video/music. It can take a URL from various services (YouTube, Vimeo, YouKu, etc). You can also search using a string.
 * `skip [number]`: Skip some number of songs. Will skip 1 song if a number is not specified.
 * `queue`: Display the current queue.
 * `pause`: Pause music playback. (requires music manager)
