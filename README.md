@@ -32,10 +32,9 @@ Bugs?
 Installation:  
 1.  
 ```bash
-npm install discord.js-music  
+npm install discord.js-music-v11  
 ```  
-2. Download this repository  
-3. Replace index.js in node_modules with the updated source.
+2. That's it!
 
 
 This is a music plugin for Discord.js. Using it is as easy as:

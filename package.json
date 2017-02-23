@@ -1,0 +1,25 @@
+{
+  "name": "discord.js-music-v11",
+  "version": "1.2.5",
+  "description": "Music plugin for discord.js v11 bots",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nexu-dev/discord.js-music.git"
+  },
+  "author": "Nexu",
+  "license": "ISC",
+  "keywords": [
+    "discord",
+    "discord.js",
+    "music",
+    "bot",
+    "plugin"
+  ],
+  "dependencies": {
+    "youtube-dl": "^1.11.1"
+  }
+}
