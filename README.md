@@ -1,5 +1,7 @@
 # Discord.js Music Plugin
 
+![alt text](https://nodei.co/npm/discord.js-music-v11.png?downloads=true&stars=true "discord.js-music-v11 stats")
+
 This version is not yet stable, although has been mildly tested, it has not been that extensive.   
 It's an update of the original by [ruiqimao](https://github.com/ruiqimao/discord.js-music) for [Discord.js](https://discord.js.org/)'s version v11.x, and adds a few extra sprinkles. It still requires tweaks and testing but yeah it's something.
 
