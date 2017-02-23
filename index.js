@@ -1,15 +1,18 @@
 const YoutubeDL = require('youtube-dl');
 const ytdl = require('ytdl-core');
 
-/*
+/**
  * Takes a discord.js client and turns it into a music bot.
- * 'derekmartinez18' done most of the work, I just fixed a few things.
+ * Thanks to 'derekmartinez18' for helping.
  * 
- * @param client The discord.js client.
- * @param options (Optional) Options to configure the music bot. Acceptable options are:
- *                prefix: The prefix to use for the commands (default '!').
- *                global: Whether to use a global queue instead of a server-specific queue (default false).
- *                maxQueueSize: The maximum queue size (default 20).
+ * @param {Client} client - The discord.js client.
+ * @param {object} options - (Optional) Options to configure the music bot. Acceptable options are:
+ * 							prefix: The prefix to use for the commands (default '!').
+ * 							global: Whether to use a global queue instead of a server-specific queue (default false).
+ * 							maxQueueSize: The maximum queue size (default 20).
+ * 							anyoneCanSkip: Allow anybody to skip the song.
+ * 							clearInvoker: Clear the command message.
+ * 							volume: The default volume of the player.
  */
 module.exports = function (client, options) {
 	// Get all options.
@@ -18,7 +21,6 @@ module.exports = function (client, options) {
 	let MAX_QUEUE_SIZE = (options && options.maxQueueSize) || 20;
 	let DEFAULT_VOLUME = (options && options.volume) || 50;
 	let ALLOW_ALL_SKIP = (options && options.anyoneCanSkip) || false;
-	let MUSIC_MANAGER = (options && options.musicManager) || {};
 	let CLEAR_INVOKER = (options && options.clearInvoker) || false;
 
 	// Create an object of queues.
@@ -48,6 +50,10 @@ module.exports = function (client, options) {
 					return resume(msg, suffix);
 				case 'volume':
 					return volume(msg, suffix);
+				case 'leave':
+					return leave(msg, suffix);
+				case 'clearqueue':
+					return clearqueue(msg, suffix);
 			}
 			if (CLEAR_INVOKER) {
 				msg.delete();
@@ -55,20 +61,22 @@ module.exports = function (client, options) {
 		}
 	});
 
-	/*
-     * Checks if a user is an admin.
-	 * @param member:object - The guild member
+	/**
+	 * Checks if a user is an admin.
+	 * 
+	 * @param {GuildMember} member - The guild member
+	 * @returns {boolean} - 
 	 */
 	function isAdmin(member) {
 		return member.hasPermission("ADMINISTRATOR");
 	}
 
-	/*
-     * Checks if a user is permitted to skip a track 
-	 * @param msg:object - The Discord message object
-	 * @param queue:array - The current queue
-	 * @return canSkip:boolean - If the user can skip
-	 * TODO: Make this better, kinda poorly written.
+	/**
+	 * Checks if the user can skip the song.
+	 * 
+	 * @param {GuildMember} member - The guild member
+	 * @param {array} queue - The current queue
+	 * @returns {boolean} - If the user can skip
 	 */
 	function canSkip(member, queue) {
 		if (ALLOW_ALL_SKIP) return true;
@@ -77,10 +85,11 @@ module.exports = function (client, options) {
 		else return false;
 	}
 
-	/*
-	 * Gets a queue.
-	 *
-	 * @param server The server id.
+	/**
+	 * Gets the song queue of the server.
+	 * 
+	 * @param {integer} server - The server id. 
+	 * @returns {object} - The song queue.
 	 */
 	function getQueue(server) {
 		// Check if global queues are enabled.
@@ -91,11 +100,12 @@ module.exports = function (client, options) {
 		return queues[server];
 	}
 
-	/*
-	 * Play command.
-	 *
-	 * @param msg Original message.
-	 * @param suffix Command suffix.
+	/**
+	 * The command for adding a song to the queue.
+	 * 
+	 * @param {Message} msg - Original message.
+	 * @param {string} suffix - Command suffix.
+	 * @returns {<promise>} - The response edit.
 	 */
 	function play(msg, suffix) {
 		// Make sure the user is in a voice channel.
@@ -114,40 +124,37 @@ module.exports = function (client, options) {
 
 		// Get the video information.
 		msg.channel.sendMessage(wrap('Searching...')).then(response => {
+			var searchstring = suffix
 			if (!suffix.toLowerCase().startsWith('http')) {
-				return msg.channel.sendMessage(wrap('You didn\'t provide a url!')).then((response) => {
-					response.delete(5000);
-				});
+				searchstring = 'gvsearch1:' + suffix;
 			}
 
-			// Get the video info from youtube-dl.
-			YoutubeDL.getInfo(suffix, ['-q', '--no-warnings', '--force-ipv4'], (err, info) => {
+			YoutubeDL.getInfo(searchstring, ['-q', '--no-warnings', '--force-ipv4'], (err, info) => {
 				// Verify the info.
 				if (err || info.format_id === undefined || info.format_id.startsWith('0')) {
 					return response.edit(wrap('Invalid video!'));
 				}
 
-				info.url = suffix;
 				info.requester = msg.author.id;
 
 				// Queue the video.
 				response.edit(wrap('Queued: ' + info.title)).then(() => {
 					queue.push(info);
-
 					// Play if only one element in the queue.
 					if (queue.length === 1) executeQueue(msg, queue);
-				}).catch(() => {
-				});
+				}).catch(console.log);
 			});
 		}).catch(() => {
 		});
 	}
 
-	/*
-	 * Skip command.
-	 *
-	 * @param msg Original message.
-	 * @param suffix Command suffix.
+
+	/**
+	 * The command for skipping a song.
+	 * 
+	 * @param {Message} msg - Original message.
+	 * @param {string} suffix - Command suffix.
+	 * @returns {<promise>} - The response message.
 	 */
 	function skip(msg, suffix) {
 		// Get the voice connection.
@@ -179,11 +186,11 @@ module.exports = function (client, options) {
 		msg.channel.sendMessage(wrap('Skipped ' + toSkip + '!'));
 	}
 
-	/*
-	 * Queue command.
-	 *
-	 * @param msg Original message.
-	 * @param suffix Command suffix.
+	/**
+	 * The command for listing the queue.
+	 * 
+	 * @param {Message} msg - Original message.
+	 * @param {string} suffix - Command suffix.
 	 */
 	function queue(msg, suffix) {
 		// Get the queue.
@@ -206,11 +213,12 @@ module.exports = function (client, options) {
 		msg.channel.sendMessage(wrap('Queue (' + queueStatus + '):\n' + text));
 	}
 
-	/*
-	 * Pause command.
-	 *
-	 * @param msg Original message.
-	 * @param suffix Command suffix.
+	/**
+	 * The command for pausing the current song.
+	 * 
+	 * @param {Message} msg - Original message.
+	 * @param {string} suffix - Command suffix.
+	 * @returns {<promise>} - The response message.
 	 */
 	function pause(msg, suffix) {
 		// Get the voice connection.
@@ -226,11 +234,51 @@ module.exports = function (client, options) {
 		if (!dispatcher.paused) dispatcher.pause();
 	}
 
-	/*
-	 * Resume command.
-	 *
-	 * @param msg Original message.
-	 * @param suffix Command suffix.
+	/**
+	 * The command for leaving the channel and clearing the queue.
+	 * 
+	 * @param {Message} msg - Original message.
+	 * @param {string} suffix - Command suffix.
+	 * @returns {<promise>} - The response message.
+	 */
+	function leave(msg, suffix) {
+		if (isAdmin(msg.member)) {
+			const queue = getQueue(msg.guild.id);
+
+			queue.splice(0, queue.length);
+
+			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
+			if (voiceConnection === null) return msg.channel.sendMessage(wrap('I\'m not in any channel!.'));
+
+			voiceConnection.leave();
+		} else {
+			msg.channel.sendMessage(wrap('You don\'t have permission to use that command!'));
+		}
+	}
+
+	/**
+	 * The command for clearing the song queue.
+	 * 
+	 * @param {Message} msg - Original message.
+	 * @param {string} suffix - Command suffix.
+	 */
+	function clearqueue(msg, suffix) {
+		if (isAdmin(msg.member)) {
+			const queue = getQueue(msg.guild.id);
+
+			queue.splice(0, queue.length);
+			msg.channel.sendMessage(wrap('Queue cleared!'));
+		} else {
+			msg.channel.sendMessage(wrap('You don\'t have permission to use that command!'));
+		}
+	}
+
+	/**
+	 * The command for resuming the current song.
+	 * 
+	 * @param {Message} msg - Original message.
+	 * @param {string} suffix - Command suffix.
+	 * @returns {<promise>} - The response message.
 	 */
 	function resume(msg, suffix) {
 		// Get the voice connection.
@@ -246,11 +294,12 @@ module.exports = function (client, options) {
 		if (dispatcher.paused) dispatcher.resume();
 	}
 
-	/*
-	 * Volume command.
-	 *
-	 * @param msg Original message.
-	 * @param suffix Command suffix.
+	/**
+	 * The command for changing the song volume.
+	 * 
+	 * @param {Message} msg - Original message.
+	 * @param {string} suffix - Command suffix.
+	 * @returns {<promise>} - The response message.
 	 */
 	function volume(msg, suffix) {
 		// Get the voice connection.
@@ -271,11 +320,12 @@ module.exports = function (client, options) {
 		dispatcher.setVolume((suffix/100));
 	}
 
-	/*
-	 * Execute the queue.
-	 *
-	 * @param msg Original message.
-	 * @param queue The queue.
+	/**
+	 * Executes the next song in the queue.
+	 * 
+	 * @param {Message} msg - Original message.
+	 * @param {object} queue - The song queue for this server.
+	 * @returns {<promise>} - The voice channel.
 	 */
 	function executeQueue(msg, queue) {
 		// If the queue is empty, finish.
@@ -310,11 +360,11 @@ module.exports = function (client, options) {
 			// Get the first item in the queue.
 			const video = queue[0];
 
-			console.log(video.url);
+			console.log(video.webpage_url);
 
 			// Play the video.
 			msg.channel.sendMessage(wrap('Now Playing: ' + video.title)).then(() => {
-				let dispatcher = connection.playStream(ytdl(video.url, {filter: 'audioonly'}), {seek: 0, volume: (DEFAULT_VOLUME/100)});
+				let dispatcher = connection.playStream(ytdl(video.webpage_url, {filter: 'audioonly'}), {seek: 0, volume: (DEFAULT_VOLUME/100)});
 
 				connection.on('error', (error) => {
 					// Skip to the next song.
@@ -349,12 +399,11 @@ module.exports = function (client, options) {
 	}
 }
 
-/*
- * Wrap text in a code block and escape grave characters.,
- *
- * @param text The input text.
- *
- * @return The wrapped text.
+/**
+ * Wrap text in a code block and escape grave characters.
+ * 
+ * @param {string} text - The input text.
+ * @returns {string} - The wrapped text.
  */
 function wrap(text) {
 	return '```\n' + text.replace(/`/g, '`' + String.fromCharCode(8203)) + '\n```';
