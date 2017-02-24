@@ -43,9 +43,9 @@ __Issue:__ Couldn't find an Opus engine.
 __Fix:__ `npm install node-opus` or `npm install opusscript`  
 __Issue:__ Any node-gyp errors. (build fail, missing cl.exe, etc.)  
 __Fix:__ This one is a little more complicated.  
-1. Download and install [Visual Studio 2015](https://www.visualstudio.com/downloads/)
-2. New project -> Visual C++
-3. Install Visual C++
+1. Download and install [Visual Studio 2015](https://www.visualstudio.com/downloads/)  
+2. New project -> Visual C++  
+3. Install Visual C++  
 
 If that doesn't fix your issue;  
 1. Download and install the [Windows 8.1 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-8-1-sdk)
