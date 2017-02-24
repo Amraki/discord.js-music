@@ -144,8 +144,7 @@ module.exports = function (client, options) {
 					if (queue.length === 1) executeQueue(msg, queue);
 				}).catch(console.log);
 			});
-		}).catch(() => {
-		});
+		}).catch(console.log);
 	}
 
 
@@ -250,7 +249,7 @@ module.exports = function (client, options) {
 			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 			if (voiceConnection === null) return msg.channel.sendMessage(wrap('I\'m not in any channel!.'));
 
-			voiceConnection.leave();
+			voiceConnection.disconnect();
 		} else {
 			msg.channel.sendMessage(wrap('You don\'t have permission to use that command!'));
 		}
