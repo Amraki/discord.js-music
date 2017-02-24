@@ -316,7 +316,7 @@ module.exports = function (client, options) {
 			response.delete(3000)
 		});
 
-		if (suffix > 200) return msg.channel.sendMessage(wrap('Volume out of range!')).then((response) => {
+		if (suffix > 200 || suffix < 0) return msg.channel.sendMessage(wrap('Volume out of range!')).then((response) => {
 			response.delete(5000);
 		});
 
