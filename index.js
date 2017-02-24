@@ -31,9 +31,9 @@ module.exports = function (client, options) {
 		const message = msg.content.trim();
 
 		// Check if the message is a command.
-		if (message.startsWith(PREFIX)) {
+		if (message.toLowerCase().startsWith(PREFIX.toLowerCase())) {
 			// Get the command and suffix.
-			const command = message.split(/[ \n]/)[0].substring(PREFIX.length).toLowerCase().trim();
+			const command = message.substring(PREFIX.length).split(/[ \n]/)[0].toLowerCase().trim();
 			const suffix = message.substring(PREFIX.length + command.length).trim();
 
 			// Process the commands.
@@ -242,13 +242,14 @@ module.exports = function (client, options) {
 	 */
 	function leave(msg, suffix) {
 		if (isAdmin(msg.member)) {
-			const queue = getQueue(msg.guild.id);
-
-			queue.splice(0, queue.length);
-
 			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 			if (voiceConnection === null) return msg.channel.sendMessage(wrap('I\'m not in any channel!.'));
+			// Clear the queue.
+			const queue = getQueue(msg.guild.id);
+			queue.splice(0, queue.length);
 
+			// End the stream and disconnect.
+			voiceConnection.player.dispatcher.end();
 			voiceConnection.disconnect();
 		} else {
 			msg.channel.sendMessage(wrap('You don\'t have permission to use that command!'));
@@ -382,11 +383,12 @@ module.exports = function (client, options) {
 				dispatcher.on('end', () => {
 					// Wait a second.
 					setTimeout(() => {
-						// Remove the song from the queue.
-						queue.shift();
-
-						// Play the next song in the queue.
-						executeQueue(msg, queue);
+						if (queue.length > 0) {
+							// Remove the song from the queue.
+							queue.shift();
+							// Play the next song in the queue.
+							executeQueue(msg, queue);
+						}
 					}, 1000);
 				});
 			}).catch((error) => {
