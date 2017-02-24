@@ -58,7 +58,7 @@ const Bot = new Discord.Client();
 const token = "<auth_token>" // Recommended to load from json file.
 
 Bot.on('ready', () => {
-    console.log("[Start] "+ new Date());
+    console.log(`[Start] ${new Date()}`);
 });
 
 music(Bot);
