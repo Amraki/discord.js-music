@@ -1,18 +1,16 @@
-const Client = require('discord.js').Client;
-const Auth = require('./auth.json');
+const Discord = require('discord.js');
+const music = require('discord.js-music-v11');
+const Bot = new Discord.Client();
+const token = "<auth_token>" // Recommended to load from json file.
 
-const music = require('../');
+Bot.on('ready', () => {
+    console.log("[Start] "+ new Date());
+});
 
-// Create a new client.
-const client = new Client();
-
-// Apply the music plugin.
-music(client, {
+music(Bot, {
 	prefix: '-',     // Prefix of '-'.
 	global: false,   // Server-specific queues.
 	maxQueueSize: 10, // Maximum queue size of 10.
 	clearInvoker: true // If permissions applicable, allow the bot to delete the messages that invoke it (start with prefix)
 });
-
-// Login.
-client.login(Auth.token);
+Bot.login(token);
