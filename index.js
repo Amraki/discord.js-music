@@ -312,9 +312,9 @@ module.exports = function (client, options) {
 		// Get the dispatcher
 		const dispatcher = voiceConnection.player.dispatcher;
 		
-		if (!suffix) return msg.channel.sendMessage(wrap('You must supply an amount!')).then((response) => {
-			response.delete(3000)
-		});
+		if (!suffix) return msg.channel.sendMessage(wrap(`The current volume is: ${dispatcher.volume * 100}`));
+		
+		if (isNaN(suffix)) return msg.channel.sendMessage(wrap('Volume must be a number!'));
 
 		if (suffix > 200 || suffix < 0) return msg.channel.sendMessage(wrap('Volume out of range!')).then((response) => {
 			response.delete(5000);
