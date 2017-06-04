@@ -62,10 +62,11 @@ Bot.on('ready', () => {
 });
 
 music(Bot, {
-	prefix: '-',     // Prefix of '-'.
-	global: false,   // Server-specific queues.
-	maxQueueSize: 10, // Maximum queue size of 10.
-	clearInvoker: true // If permissions applicable, allow the bot to delete the messages that invoke it (start with prefix)
+	prefix: '-',        // Prefix of '-'.
+	global: false,      // Server-specific queues.
+	maxQueueSize: 10,   // Maximum queue size of 10.
+	clearInvoker: true, // If permissions applicable, allow the bot to delete the messages that invoke it (start with prefix)
+    channel: 'music'    // Name of voice channel to join. If omitted, will instead join user's voice channel.
 });
 Bot.login(token);
 ```
@@ -81,6 +82,7 @@ The module consists of a single function, which takes two arguments:
  * 		anyoneCanSkip: Allow anybody to skip the song.
  * 		clearInvoker: Clear the command message.
  * 		volume: The default volume of the player.
+ *      channel: Name of voice channel to join. If omitted, will instead join user's voice channel.
  */
 music(client, options);
 ```

@@ -8,9 +8,10 @@ Bot.on('ready', () => {
 });
 
 music(Bot, {
-	prefix: '-',     // Prefix of '-'.
-	global: false,   // Server-specific queues.
-	maxQueueSize: 10, // Maximum queue size of 10.
-	clearInvoker: true // If permissions applicable, allow the bot to delete the messages that invoke it (start with prefix)
+	prefix: '-',       // Prefix of '-'.
+	global: false,     // Server-specific queues.
+	maxQueueSize: 10,  // Maximum queue size of 10.
+	clearInvoker: true, // If permissions applicable, allow the bot to delete the messages that invoke it (start with prefix)
+    channel: 'music'   // Name of voice channel to join. If omitted, will instead join user's voice channel.
 });
 Bot.login(token);
